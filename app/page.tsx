@@ -50,18 +50,86 @@ const RULES_DATA = [
   }
 ];
 
+const DETAILS = [
+  {
+    id: 1,
+    gejala: "Indikator Power mati",
+    youtube: ""
+  },
+  {
+    id: 2,
+    gejala: "Kipas diam",
+    youtube: ""
+  },
+  {
+    id: 3,
+    gejala: "LED pada motherboard mati",
+    youtube: ""
+  },
+  {
+    id: 4,
+    gejala: "Bunyi beep 3 kali",
+    youtube: ""
+  },
+  {
+    id: 5,
+    gejala: "Layar black screen/blank",
+    youtube: "https://youtu.be/KaoD3bNTC7Q?si=enK17GPKErBuRBG2&t=34"
+  },
+  {
+    id: 6,
+    gejala: "Komputer restart sendiri",
+    youtube: ""
+  },
+  {
+    id: 7,
+    gejala: "Bunyi klik",
+    youtube: ""
+  },
+  {
+    id: 8,
+    gejala: "Booting lambat",
+    youtube: ""
+  },
+  {
+    id: 9,
+    gejala: "Blue screen",
+    youtube: ""
+  },
+  {
+    id: 10,
+    gejala: "Kipas bising",
+    youtube: ""
+  },
+  {
+    id: 11,
+    gejala: "Performa lambat",
+    youtube: ""
+  },
+  {
+    id: 12,
+    gejala: "Muncul artefak pada layer",
+    youtube: ""
+  },
+  {
+    id: 13,
+    gejala: "Slot RAM tidak berfungsi",
+    youtube: ""
+  },
+];
+
 // Fungsi CF Combine
 const cfCombine = (cf1:number, cf2:number):number => {
   return cf1 + cf2 * (1 - cf1);
 };
 
 // Fungsi menghitung CF untuk diagnosa
-const calculateDiagnosis = (selectedSymptoms) => {
+const calculateDiagnosis = (symptoms) => {
   const results = [];
   
   RULES_DATA.forEach(rule => {
     const matchingSymptoms = rule.gejala.filter(g => 
-      selectedSymptoms.includes(g)
+      symptoms.includes(g)
     );
     
     if (matchingSymptoms.length > 0) {
@@ -101,10 +169,12 @@ const getAllSymptoms = () => {
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
-  const [selectedSymptoms, setSelectedSymptoms] = useState([]);
+  const [symptoms, setSymptoms] = useState([]);
   const [diagnosisResult, setDiagnosisResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [allSymptoms] = useState(getAllSymptoms());
+  const [details, setDetails] = useState(false);
+  const [selectedSymptoms, setSelectedSymtoms] = useState();
 
   // Load history dari localStorage
   useEffect(() => {
@@ -115,24 +185,26 @@ function App() {
   }, []);
 
   const handleSymptomToggle = (symptom) => {
-    setSelectedSymptoms(prev => 
+    setSymptoms(prev => 
       prev.includes(symptom) 
         ? prev.filter(s => s !== symptom)
         : [...prev, symptom]
     );
+    setSelectedSymtoms(symptom)
+    setDetails(true)
   };
 
   const handleDiagnose = () => {
-    if (selectedSymptoms.length === 0) {
+    if (symptoms.length === 0) {
       alert('Pilih minimal 1 gejala untuk diagnosa');
       return;
     }
 
-    const results = calculateDiagnosis(selectedSymptoms);
+    const results = calculateDiagnosis(symptoms);
     const diagnosis = {
       id: Date.now(),
       timestamp: new Date().toISOString(),
-      symptoms: [...selectedSymptoms],
+      symptoms: [...symptoms],
       results
     };
 
@@ -145,8 +217,11 @@ function App() {
   };
 
   const handleReset = () => {
-    setSelectedSymptoms([]);
+    setSymptoms([]);
     setDiagnosisResult(null);
+    if (details == true) {
+      setDetails(false)
+    }
   };
 
   const handleClearHistory = () => {
@@ -157,114 +232,125 @@ function App() {
   };
 
   const renderHome = () => (
-    <div className="space-y-6 text-gray-900">
-      <div className="bg-linear-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
-        <h1 className="text-3xl font-bold mb-2">Sistem Pakar Diagnosa Komputer</h1>
-        <p className="text-blue-100">Pilih gejala yang dialami komputer Anda untuk mendapatkan solusi</p>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <Stethoscope className="w-6 h-6" />
-          Pilih Gejala
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {allSymptoms.map(symptom => (
-            <label
-              key={symptom}
-              className="flex items-center gap-3 p-3 border rounded-lg hover:bg-blue-50 cursor-pointer transition"
-            >
-              <input
-                type="checkbox"
-                checked={selectedSymptoms.includes(symptom)}
-                onChange={() => handleSymptomToggle(symptom)}
-                className="w-5 h-5 text-blue-600"
-              />
-              <span className="text-gray-700">{symptom}</span>
-            </label>
-          ))}
+    <div className="flex justify-center items-start w-full">
+      <div className="py-8 shrink-0 space-y-6 text-gray-900 w-200">
+        {/* heading */}
+        <div className="bg-linear-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
+          <h1 className="text-3xl font-bold mb-2">Sistem Pakar Diagnosa Komputer</h1>
+          <p className="text-blue-100">Pilih gejala yang dialami komputer Anda untuk mendapatkan solusi</p>
         </div>
-
-        <div className="flex gap-3 mt-6">
-          <button
-            onClick={handleDiagnose}
-            disabled={selectedSymptoms.length === 0}
-            className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
-          >
-            Diagnosa Sekarang
-          </button>
-          <button
-            onClick={handleReset}
-            className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center gap-2"
-          >
-            <RotateCcw className="w-5 h-5" />
-            Reset
-          </button>
-        </div>
-      </div>
-
-      {diagnosisResult && (
+        {/* checkboxes */}
         <div className="bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-bold mb-4">Hasil Diagnosa</h2>
-          
-          {diagnosisResult.results.length > 0 ? (
-            <>
-              <div className="mb-6">
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={diagnosisResult.results}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="nama_rule" 
-                      angle={-45} 
-                      textAnchor="end" 
-                      height={120}
-                      interval={0}
-                      tick={{ fontSize: 12 }}
-                    />
-                    <YAxis label={{ value: 'Persentase (%)', angle: -90, position: 'insideLeft' }} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="cf_percentage" fill="#3b82f6" name="Certainty Factor (%)" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <Stethoscope className="w-6 h-6" />
+            Pilih Gejala
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {allSymptoms.map(symptom => (
+              <label
+                key={symptom}
+                className="flex items-center gap-3 p-3 border rounded-lg hover:bg-blue-50 cursor-pointer transition"
+              >
+                <input
+                  type="checkbox"
+                  checked={symptoms.includes(symptom)}
+                  onChange={() => handleSymptomToggle(symptom)}
+                  className="w-5 h-5 text-blue-600"
+                />
+                <span className="text-gray-700">{symptom}</span>
+              </label>
+            ))}
+          </div>
 
-              <div className="space-y-4">
-                {diagnosisResult.results.map((result, index) => (
-                  <div 
-                    key={result.id}
-                    className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded-r-lg"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-lg">
-                        #{index + 1} {result.nama_rule}
-                      </h3>
-                      <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                        {result.cf_percentage}%
-                      </span>
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={handleDiagnose}
+              disabled={symptoms.length === 0}
+              className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+            >
+              Diagnosa Sekarang
+            </button>
+            <button
+              onClick={handleReset}
+              className="px-6 py-3 border-2 border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center gap-2"
+            >
+              <RotateCcw className="w-5 h-5" />
+              Reset
+            </button>
+          </div>
+        </div>
+
+        {diagnosisResult && (
+          <div className="bg-white rounded-lg shadow-lg p-6 w-200">
+            <h2 className="text-xl font-bold mb-4">Hasil Diagnosa</h2>
+            
+            {diagnosisResult.results.length > 0 ? (
+              <>
+                <div className="mb-6">
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={diagnosisResult.results}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="nama_rule" 
+                        angle={-45} 
+                        textAnchor="end" 
+                        height={120}
+                        interval={0}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis label={{ value: 'Persentase (%)', angle: -90, position: 'insideLeft' }} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="cf_percentage" fill="#3b82f6" name="Certainty Factor (%)" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="space-y-4">
+                  {diagnosisResult.results.map((result, index) => (
+                    <div 
+                      key={result.id}
+                      className="border-l-4 border-blue-500 bg-blue-50 p-4 rounded-r-lg"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-bold text-lg">
+                          #{index + 1} {result.nama_rule}
+                        </h3>
+                        <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          {result.cf_percentage}%
+                        </span>
+                      </div>
+                      <p className="text-gray-600 mb-2">
+                        <strong>Gejala cocok:</strong> {result.matching_symptoms} dari {result.total_symptoms}
+                      </p>
+                      <p className="text-gray-800">
+                        <strong>Solusi:</strong> {result.solusi}
+                      </p>
                     </div>
-                    <p className="text-gray-600 mb-2">
-                      <strong>Gejala cocok:</strong> {result.matching_symptoms} dari {result.total_symptoms}
-                    </p>
-                    <p className="text-gray-800">
-                      <strong>Solusi:</strong> {result.solusi}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p className="text-gray-600 text-center py-8">
-              Tidak ditemukan kerusakan yang sesuai dengan gejala yang dipilih.
-            </p>
-          )}
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="text-gray-600 text-center py-8">
+                Tidak ditemukan kerusakan yang sesuai dengan gejala yang dipilih.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+      {details && (
+        <div className="mx-4 bg-sky-500 w-full h-dvh">
+          <div>{selectedSymptoms}</div>
+          <div></div>
+          <div></div>
+          <button onClick={() => setDetails(false)} className="mx-2 px-3 py-2 bg-white rounded-lg text-gray-900">Tutup</button>
         </div>
       )}
     </div>
   );
 
   const renderHistory = () => (
-    <div className="space-y-6 text-gray-900">
+    <div className="space-y-6 text-gray-900 py-8">
       <div className="bg-linear-to-r from-purple-600 to-pink-600 rounded-lg p-6 text-white">
         <h1 className="text-3xl font-bold mb-2">Riwayat Diagnosa</h1>
         <p className="text-purple-100">Lihat kembali hasil diagnosa sebelumnya</p>
@@ -282,7 +368,7 @@ function App() {
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4 ">
             {history.map((item) => (
               <div key={item.id} className="bg-white rounded-lg shadow-lg p-6">
                 <div className="flex justify-between items-start mb-4">
@@ -364,7 +450,7 @@ function App() {
               }`}
             >
               <History className="w-5 h-5" />
-              Riwayat
+              Riwayat 
               {history.length > 0 && (
                 <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                   {history.length}
@@ -375,13 +461,13 @@ function App() {
         </div>
       </nav>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main className="max-w-5xl mx-auto">
         {currentPage === 'home' ? renderHome() : renderHistory()}
       </main>
 
-      <footer className="bg-white border-t mt-12 py-6">
+      <footer className="bg-white border-t mt-4 py-6">
         <div className="max-w-5xl mx-auto px-4 text-center text-gray-600">
-          <p>Sistem Pakar Diagnosa Komputer - Menggunakan Metode Certainty Factor</p>
+          <p>Sistem Pakar Diagnosa Komputer - Menggunakan Metode Forward Chaining & Certainty Factor</p>
         </div>
       </footer>
     </div>
