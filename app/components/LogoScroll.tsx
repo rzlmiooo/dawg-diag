@@ -6,10 +6,12 @@ export default function LogoScroll() {
       "/marque/amd.svg",
       "/marque/nvidia.svg",
       "/marque/msi.svg",
-      "/marque/intel.svg",
-      "/marque/amd.svg",
-      "/marque/nvidia.svg",
-      "/marque/msi.svg"
+      "/marque/lenovo.svg",
+      "/marque/gigabyte.svg",
+      "/marque/hp.svg",
+      "/marque/asus.svg",
+      "/marque/sapphire.svg",
+      "/marque/powercolor.svg",
     ];    
   
     return (
