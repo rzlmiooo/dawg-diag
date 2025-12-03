@@ -195,14 +195,9 @@ function App() {
   const [diagnosisResult, setDiagnosisResult] = useState<Diagnosis | null>(null);
   const [history, setHistory] = useState<Diagnosis[]>([]);
   const [allSymptoms] = useState(getAllSymptoms());
-
-  const [details, setDetails] = useState(false);
-  const [selectedSymptoms, setSelectedSymtoms] = useState();
-
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLandingPage, setLandingPage] = useState(true);
 
-  // Load history dari localStorage
   useEffect(() => {
     const savedHistory = localStorage.getItem('diagnosis_history');
     if (savedHistory) {
@@ -229,8 +224,6 @@ function App() {
         ? prev.filter(s => s !== symptom)
         : [...prev, symptom]
     );
-    setSelectedSymtoms(symptom)
-    setDetails(true)
   };
 
   const handleDiagnose = () => {
@@ -258,9 +251,6 @@ function App() {
   const handleReset = () => {
     setSymptoms([]);
     setDiagnosisResult(null);
-    if (details == true) {
-      setDetails(false)
-    }
   };
 
   const handleClearHistory = () => {
@@ -271,163 +261,167 @@ function App() {
   };
 
   const renderHome = () => (
-    <div className="flex justify-center items-start w-full">
-      <div className="py-8 shrink-0 space-y-6 w-200">
-        
-        {/* heading */}
-        <div className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-2xl p-7 text-white shadow-lg">
-          <h1 className="text-3xl font-extrabold mb-2 tracking-tight">Sistem Pakar Diagnosa Komputer</h1>
-          <p className="text-indigo-100 text-base">Pilih gejala yang dialami komputer Anda untuk mendapatkan solusi</p>
+    <div className="space-y-6">
+
+      {/* HEADER */}
+      <div className="bg-linear-to-b from-gray-50 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-7 text-gray-900 dark:text-gray-100 shadow-lg">
+        <h1 className="flex gap-2 items-center text-2xl sm:text-3xl font-bold mb-2 tracking-tight"><Image src="/logo.png" alt="logo" width={50} height={50} className="w-12 h-auto invert-0 dark:invert" /> Dawg Diag</h1>
+        <p className="text-gray-900 dark:text-gray-100 text-sm">Pilih satu atau lebih gejala untuk memulai analisis</p>
+      </div>
+
+      {/* GEJALA LIST */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 transition-colors duration-300">
+        <h2 className="text-xl font-semibold mb-5 flex items-center gap-4 text-gray-800 dark:text-gray-100">
+          <Stethoscope className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+          Gejala yang Dialami:
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {allSymptoms.map(symptom => (
+            <label
+              key={symptom}
+              className={`
+                flex items-center gap-3 p-4 border rounded-xl transition 
+                cursor-pointer shadow-sm
+                hover:shadow-md 
+                ${symptoms.includes(symptom)
+                  ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-500'
+                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700/50 hover:border-indigo-500 dark:hover:border-indigo-400'}
+              `}
+            >
+              <input
+                type="checkbox"
+                checked={symptoms.includes(symptom)}
+                onChange={() => handleSymptomToggle(symptom)}
+                className="w-5 h-5 accent-indigo-600 rounded focus:ring-indigo-500"
+              />
+              <span className={`font-medium ${symptoms.includes(symptom) ? 'text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300'}`}>
+                {symptom}
+              </span>
+            </label>
+          ))}
         </div>
 
-        {/* checkboxes */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 transition-colors duration-300">
-          <h2 className="text-xl font-semibold mb-5 flex items-center gap-2 text-gray-800 dark:text-gray-100">
-            <Stethoscope className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-            Pilih Gejala
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {allSymptoms.map(symptom => (
-              <label
-                key={symptom}
-                className={`
-                  flex items-center gap-3 p-4 border rounded-xl transition 
-                  cursor-pointer shadow-sm
-                  hover:shadow-md 
-                  ${symptoms.includes(symptom)
-                    ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-500'
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700/50 hover:border-indigo-500 dark:hover:border-indigo-400'}
-                `}
-              >
-                <input
-                  type="checkbox"
-                  checked={symptoms.includes(symptom)}
-                  onChange={() => handleSymptomToggle(symptom)}
-                  className="w-5 h-5 accent-indigo-600 rounded focus:ring-indigo-500"
-                />
-                <span className={`font-medium ${symptoms.includes(symptom) ? 'text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300'}`}>{symptom}</span>
-              </label>
-            ))}
-          </div>
-
-          <div className="flex gap-3 mt-6">
-            <button
-              onClick={handleDiagnose}
-              disabled={symptoms.length === 0}
-              className="
-              flex-1 py-3 rounded-xl font-semibold text-white 
+        {/* BUTTONS */}
+        <div className="flex flex-col md:flex-row gap-4 mt-6">
+          <button
+            onClick={handleDiagnose}
+            disabled={symptoms.length === 0}
+            className="
+              flex-1 py-3 rounded-xl font-semibold text-gray-100 
               bg-linear-to-r from-indigo-600 to-purple-600
               shadow-md hover:shadow-lg hover:brightness-110
               active:scale-[0.98] transition disabled:opacity-40 disabled:cursor-not-allowed
             "
-            >
-              Diagnosa Sekarang
-            </button>
-            <button
-              onClick={handleReset}
-              className="
+          >
+            Diagnosa Sekarang
+          </button>
+
+          <button
+            onClick={handleReset}
+            className="
               px-5 py-3 rounded-xl border border-gray-300 dark:border-gray-600 font-medium 
               hover:bg-gray-100 dark:hover:bg-gray-700 active:scale-[0.97] transition
               flex items-center justify-center gap-2 text-gray-700 dark:text-gray-200
             "
-            >
-              <RotateCcw className="w-5 h-5" />
-              Reset
-            </button>
-          </div>
+          >
+            <RotateCcw className="w-5 h-5" />
+            Reset
+          </button>
         </div>
+      </div>
 
-        {diagnosisResult && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 animate-fadeIn transition-colors duration-300 w-200">
-            <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">Hasil Diagnosa</h2>
-            
-            {diagnosisResult.results.length > 0 ? (
-              <>
-                <div className="mb-6">
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={diagnosisResult.results}>
-                      <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
-                      <XAxis 
-                        dataKey="nama_rule" 
-                        angle={-45} 
-                        textAnchor="end" 
-                        height={120}
-                        interval={0}
-                        tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
-                      />
-                      <YAxis tick={{ fill: isDarkMode ? '#d1d5db' : '#374151' }} label={{ value: 'Persentase (%)', angle: -90, position: 'insideLeft' }} />
-                      <Tooltip 
+      {/* HASIL DIAGNOSA */}
+      {diagnosisResult && (
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md p-6 border border-gray-100 dark:border-gray-700 animate-fadeIn transition-colors duration-300">
+          <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">Hasil Diagnosa</h2>
+
+          {diagnosisResult.results.length > 0 ? (
+            <>
+              {/* CHART */}
+              <div className="mb-8 mt-4">
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={diagnosisResult.results}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={isDarkMode ? '#374151' : '#e5e7eb'} />
+                    <XAxis
+                      dataKey="nama_rule"
+                      angle={-25}
+                      textAnchor="end"
+                      height={80}
+                      tick={{ fontSize: 12, fill: isDarkMode ? '#d1d5db' : '#374151' }}
+                    />
+                    <YAxis tick={{ fill: isDarkMode ? '#d1d5db' : '#374151' }} />
+                    <Tooltip 
                       contentStyle={{ 
                         backgroundColor: isDarkMode ? '#1f2937' : '#fff', 
                         borderColor: isDarkMode ? '#374151' : '#e5e7eb',
                         color: isDarkMode ? '#fff' : '#000'
                       }} 
                     />
-                      <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                      <Bar 
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Bar 
                       dataKey="cf_percentage" 
                       fill="#6366f1" 
-                      name="Certainty Factor (%)"
+                      name="Persentase Keyakinan (%)"
                       radius={[6, 6, 0, 0]} 
                     />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
 
-                <div className="space-y-4">
-                  {diagnosisResult.results.map((result, index) => (
-                    <div 
-                      key={result.id}
-                      className="border-l-4 border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl shadow-sm
-                      hover:shadow-md transition"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-lg">
-                          #{index + 1} {result.nama_rule}
-                        </h3>
-                        <span className="
-                        bg-indigo-600 text-white px-3 py-1 rounded-full 
+              {/* DETAIL LIST */}
+              <div className="space-y-4">
+                {diagnosisResult.results.map((result, index) => (
+                  <div
+                    key={result.id}
+                    className="
+                      border-l-4 border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl shadow-sm
+                      hover:shadow-md transition
+                    "
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-lg">
+                        #{index + 1} {result.nama_rule}
+                      </h3>
+
+                      <span className="
+                        bg-indigo-600 text-gray-100 px-3 py-1 rounded-full 
                         text-sm font-bold shadow
                       ">
-                          {result.cf_percentage}%
-                        </span>
-                      </div>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
-                        <strong>Gejala cocok:</strong> {result.matching_symptoms} dari {result.total_symptoms}
-                      </p>
-                      <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800/50">
-                        <p className="text-gray-700 dark:text-gray-300">
-                          <strong className="text-indigo-600 dark:text-indigo-400">Solusi:</strong> {result.solusi}
-                        </p>
-                      </div>
+                        {result.cf_percentage}%
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-5 italic">
-                Tidak ditemukan kerusakan yang sesuai dengan gejala yang dipilih.
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-      {details && (
-        <div className="mx-4 bg-sky-500 w-full h-dvh">
-          <div>{selectedSymptoms}</div>
-          <div></div>
-          <div></div>
-          <button onClick={() => setDetails(false)} className="mx-2 px-3 py-2 bg-white rounded-lg">Tutup</button>
+
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
+                      <strong>Gejala cocok:</strong> {result.matching_symptoms} dari {result.total_symptoms}
+                    </p>
+
+                    <div className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800/50">
+                      <p className="text-gray-700 dark:text-gray-300">
+                        <strong className="text-indigo-600 dark:text-indigo-400">Solusi:</strong> {result.solusi}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-gray-500 dark:text-gray-400 text-center py-5 italic">
+              Tidak ada rule yang cocok. Coba pilih gejala lain.
+            </p>
+          )}
         </div>
       )}
+
     </div>
   );
 
   const renderHistory = () => (
-    <div className="space-y-6 py-8">
-      <div className="bg-linear-to-r from-purple-600 to-pink-600 rounded-lg p-6 text-white shadow-lg">
-        <h1 className="text-3xl font-bold mb-2">Riwayat Diagnosa</h1>
-        <p className="text-purple-100">Lihat kembali hasil diagnosa sebelumnya</p>
+    <div className="space-y-6">
+
+      <div className="bg-linear-to-b from-gray-50 to-gray-200 dark:from-gray-800 dark:to-gray-900 rounded-lg p-6 text-gray-900 dark:text-gray-100 shadow-lg">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2">Riwayat Diagnosa</h1>
+        <p className="text-gray-900 dark:text-gray-100">Lihat hasil analisis sebelumnya</p>
       </div>
 
       {history.length > 0 ? (
@@ -435,26 +429,23 @@ function App() {
           <div className="flex justify-end">
             <button
               onClick={handleClearHistory}
-              className="bg-red-600 text-white px-4 py-2 rounded-xl font-semibold shadow hover:bg-red-700 active:scale-[0.98] transition flex items-center gap-2"
+              className="bg-red-600 text-gray-100 px-4 py-2 rounded-xl font-semibold shadow hover:bg-red-700 active:scale-[0.98] transition flex items-center gap-2"
             >
               <Trash2 className="w-5 h-5" />
-              Hapus Riwayat
+              Hapus Semua
             </button>
           </div>
 
           <div className="space-y-4">
-            {history.map((item) => (
+            {history.map(item => (
               <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-100 dark:border-gray-700 transition-colors">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                      {new Date(item.timestamp).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}
-                    </p>
-                    <p className="text-gray-700 dark:text-gray-300 mt-1">
-                      <strong>Gejala:</strong> <span className="italic text-gray-600 dark:text-gray-400">{item.symptoms.join(', ')}</span>
-                    </p>
-                  </div>
-                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  {new Date(item.timestamp).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' })}
+                </p>
+
+                <p className="text-gray-700 dark:text-gray-300 mt-1">
+                  <strong>Gejala:</strong> <span className="italic text-gray-600 dark:text-gray-400">{item.symptoms.join(', ')}</span>
+                </p>
 
                 {item.results.length > 0 ? (
                   <div className="space-y-3 mt-4">
@@ -464,7 +455,7 @@ function App() {
                           <h4 className="font-semibold text-gray-800 dark:text-gray-200">
                             #{index + 1} {result.nama_rule}
                           </h4>
-                          <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          <span className="bg-purple-600 text-gray-100 px-3 py-1 rounded-full text-sm font-bold">
                             {result.cf_percentage}%
                           </span>
                         </div>
@@ -486,7 +477,7 @@ function App() {
 
           <button
             onClick={() => setCurrentPage('home')}
-            className="mt-6 bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow-lg"
+            className="mt-6 bg-purple-600 text-gray-100 px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition shadow-lg"
           >
             Mulai Diagnosa
           </button>
@@ -524,10 +515,10 @@ function App() {
                         Mode Gelap
                       </span>
                     </>
-                    }
+                  }
                 </button>
                 <Link href="https://github.com/rzlmiooo/dawg-diag" target='_blank'>
-                    <Image src="/github.svg" width={100} height={100} className='w-auto h-9 invert' />
+                    <Image src="/github.svg" alt="github" width={100} height={100} className='w-auto h-9 invert' />
                 </Link>
               </div>
             </nav>
@@ -575,9 +566,9 @@ function App() {
                 <div className="flex gap-2 sm:gap-4">
                   <button
                     onClick={() => setCurrentPage('home')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
+                    className={`flex items-center gap-2 px-4 py-2 font-semibold transition-all duration-300 text-sm sm:text-base ${
                       currentPage === 'home'
-                        ? 'bg-indigo-600 text-white shadow-indigo-500/30 shadow-lg'
+                        ? 'bg-sky-600 text-gray-100 shadow-indigo-500/30 shadow-lg'
                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
@@ -587,16 +578,16 @@ function App() {
 
                   <button
                     onClick={() => setCurrentPage('history')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-300 text-sm sm:text-base ${
+                    className={`flex items-center gap-2 px-4 py-2 font-semibold transition-all duration-300 text-sm sm:text-base ${
                       currentPage === 'history'
-                        ? 'bg-purple-600 text-white shadow-purple-500/30 shadow-lg'
+                        ? 'bg-lime-600 text-gray-100 shadow-purple-500/30 shadow-lg'
                         : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }`}
                   >
                     <History className="w-4 h-4 sm:w-5 sm:h-5" />
                     Riwayat
                     {history.length > 0 && (
-                      <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-1">
+                      <span className="bg-red-500 text-gray-100 text-xs px-2 py-0.5 rounded-full ml-1">
                         {history.length}
                       </span>
                     )}
@@ -612,13 +603,17 @@ function App() {
                   {isDarkMode ?
                     <>
                       <Sun className="w-5 h-5" />
-                      Mode Terang
+                      <span className="hidden sm:block">
+                        Mode Terang
+                      </span>
                     </> : 
                     <>
                       <Moon className="w-5 h-5" />
-                      Mode Gelap
+                      <span className="hidden sm:block">
+                        Mode Gelap
+                      </span>
                     </>
-                    }
+                  }
                 </button>
 
               </div>
@@ -635,8 +630,9 @@ function App() {
           {/* FOOTER */}
           <footer className="bg-white dark:bg-gray-800 border-t dark:border-gray-700 mt-12 py-8 transition-colors duration-300">
             <div className="max-w-5xl mx-auto px-4 text-center text-gray-500 dark:text-gray-400">
-              <p className="font-medium">Sistem Pakar Diagnosa Komputer</p>
-              <p className="text-sm mt-1 opacity-70">Metode Certainty Factor • © {new Date().getFullYear()}</p>
+              <p className="text-sm mt-1 opacity-70">
+                Copyright(C) 2025. Rizal, Syfa, dan Varid
+              </p>
             </div>
           </footer>
 
